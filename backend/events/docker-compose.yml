@@ -1,0 +1,52 @@
+services:
+  events-nginx:
+    build:
+      context: ..
+      dockerfile: .docker/nginx/Dockerfile
+      args:
+        STAGE: events
+    ports:
+      - "${APP_PORT:-127.0.0.1:83}:83"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./storage:/var/www/html/storage
+    depends_on:
+      - events-api
+    environment:
+      - API_SERVICE_NAME=events-api
+    networks:
+      - events
+
+  events-api:
+    build:
+      context: ..
+      dockerfile: .docker/app/Dockerfile
+      args:
+        APP_ENV: "${APP_ENV}"
+        STAGE: events
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - events-mysql
+    networks:
+      - events
+
+  events-mysql:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: '${EVENTS_DB_DATABASE}'
+      MYSQL_USER: '${EVENTS_DB_USERNAME}'
+      MYSQL_PASSWORD: '${EVENTS_DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: '${EVENTS_DB_PASSWORD}'
+    volumes:
+      - 'events-mysql-data:/var/lib/mysql'
+      - 'events-mysql-logs:/var/log/mysql'
+    networks:
+      - events
+
+volumes:
+  events-mysql-data:
+  events-mysql-logs:
+networks:
+  events: {} 

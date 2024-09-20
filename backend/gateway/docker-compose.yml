@@ -1,0 +1,33 @@
+services:
+  gateway-nginx:
+    build:
+      context: ..
+      dockerfile: .docker/nginx/Dockerfile
+      args:
+        STAGE: gateway
+    ports:
+      - "${APP_PORT:-127.0.0.1:81}:81"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./storage:/var/www/html/storage
+    depends_on:
+      - gateway-api
+    environment:
+      - API_SERVICE_NAME=gateway-api
+    networks:
+      - gateway
+
+  gateway-api:
+    build:
+      context: ..
+      dockerfile: .docker/app/Dockerfile
+      args:
+        APP_ENV: "${APP_ENV}"
+        STAGE: gateway
+    volumes:
+      - .:/var/www/html
+    networks:
+      - gateway
+
+networks:
+  gateway: {}

@@ -1,0 +1,68 @@
+services:
+  users-nginx:
+    build:
+      context: ..
+      dockerfile: .docker/nginx/Dockerfile
+      args:
+        STAGE: users
+    ports:
+      - "${APP_PORT:-127.0.0.1:84}:84"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./storage:/var/www/html/storage
+    depends_on:
+      - users-api
+    environment:
+      - API_SERVICE_NAME=users-api
+    networks:
+      - users
+
+  users-api:
+    build:
+      context: ..
+      dockerfile: .docker/app/Dockerfile
+      args:
+        APP_ENV: "${APP_ENV}"
+        STAGE: users
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - users-mysql
+    networks:
+      - users
+
+  users-mysql:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: '${USERS_DB_DATABASE}'
+      MYSQL_USER: '${USERS_DB_USERNAME}'
+      MYSQL_PASSWORD: '${USERS_DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: '${USERS_DB_PASSWORD}'
+    volumes:
+      - 'users-mysql-data:/var/lib/mysql'
+      - 'users-mysql-logs:/var/log/mysql'
+    networks:
+      - users
+
+  users-phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    links:
+      - users-mysql
+    ports:
+      - '${PHPMYADMIN_PORT:-127.0.0.1:8081}:80'
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: users-mysql
+      PMA_USER: '${USERS_DB_USERNAME}'
+      PMA_PASSWORD: '${USERS_DB_PASSWORD}'
+    depends_on:
+      - users-mysql
+    networks:
+      - users
+
+volumes:
+  users-mysql-data:
+  users-mysql-logs:
+networks:
+  users: {}

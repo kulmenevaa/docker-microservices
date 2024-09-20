@@ -1,0 +1,81 @@
+services:
+  gateway-nginx:
+    extends:
+      file: backend/gateway/docker-compose.yml
+      service: gateway-nginx
+    networks:
+      - gateway
+
+  gateway-api:
+    extends:
+      file: backend/gateway/docker-compose.yml
+      service: gateway-api
+    networks:
+      - gateway
+
+  users-nginx:
+    extends:
+      file: backend/users/docker-compose.yml
+      service: users-nginx
+    networks:
+      - users
+
+  users-api:
+    extends:
+      file: backend/users/docker-compose.yml
+      service: users-api
+    networks:
+      - users
+
+  users-mysql:
+    extends:
+      file: backend/users/docker-compose.yml
+      service: users-mysql
+    networks:
+      - users
+
+  users-phpmyadmin:
+    extends:
+      file: backend/users/docker-compose.yml
+      service: users-phpmyadmin
+    networks:
+      - users
+
+  events-nginx:
+    extends:
+      file: backend/events/docker-compose.yml
+      service: events-nginx
+    networks:
+      - events
+
+  events-api:
+    extends:
+      file: backend/events/docker-compose.yml
+      service: events-api
+    networks:
+      - events
+
+  events-mysql:
+    extends:
+      file: backend/events/docker-compose.yml
+      service: events-mysql
+    networks:
+      - events
+
+  # frontend:
+  #   extends:
+  #     file: frontend/docker-compose.yml
+  #     service: frontend
+  #   networks:
+  #     - frontend
+
+volumes:
+  users-mysql-data:
+  users-mysql-logs:
+  events-mysql-data:
+  events-mysql-logs:
+networks:
+  users: {}
+  events: {}
+  gateway: {}
+  frontend: {}
