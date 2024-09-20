@@ -62,12 +62,12 @@ services:
     networks:
       - events
 
-  # frontend:
-  #   extends:
-  #     file: frontend/docker-compose.yml
-  #     service: frontend
-  #   networks:
-  #     - frontend
+  frontend:
+    extends:
+      file: frontend/docker-compose.yml
+      service: frontend
+    networks:
+      - frontend
 
 volumes:
   users-mysql-data:
